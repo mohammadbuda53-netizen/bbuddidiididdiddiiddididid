@@ -1,0 +1,14 @@
+{
+  "name": "bbuddidiididdiddiiddididid",
+  "version": "1.0.0",
+  "description": "WhatsApp bot MVP server",
+  "main": "index.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node index.js",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
