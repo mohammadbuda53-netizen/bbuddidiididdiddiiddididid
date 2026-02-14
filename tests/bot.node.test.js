@@ -12,6 +12,18 @@ test('deduplicates inbound messages', () => {
   assert.equal(second.outbound.length, 0);
 });
 
+test('does not deduplicate unknown contact inbound before contact exists', () => {
+  const bot = new BotService();
+  assert.throws(
+    () => bot.receiveInbound({ providerMessageId: 'm1', conversationId: 'c1', contactId: 'u1', content: 'ok' }),
+    /Unknown contact u1/
+  );
+
+  bot.registerContact({ contactId: 'u1', whatsappE164: '+49123', firstName: 'Max' });
+  const retried = bot.receiveInbound({ providerMessageId: 'm1', conversationId: 'c1', contactId: 'u1', content: 'ok' });
+  assert.equal(retried.outbound.length, 1);
+});
+
 test('qualifies lead for >= 100 leads', () => {
   const bot = new BotService();
   bot.registerContact({ contactId: 'u1', whatsappE164: '+49123', firstName: 'Max' });

@@ -57,6 +57,12 @@ class WhatsAppBotApp:
         template_name: str | None = None,
     ) -> OutboundMessage:
         now = now or datetime.utcnow()
+        contact = self.store.get_contact(contact_id)
+        if not contact:
+            raise ValueError(f"Unknown contact {contact_id}")
+        if not contact.consent_granted:
+            raise ValueError("consent_revoked")
+
         conversation = self.store.create_or_get_conversation(conversation_id, contact_id)
         decision = PolicyEngine.evaluate_send(conversation, now, message_type)
         if not decision.allowed:
