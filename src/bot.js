@@ -32,10 +32,11 @@ class BotService {
       throw new Error('providerMessageId, conversationId and contactId are required');
     }
     if (this.processedIds.has(providerMessageId)) return { outbound: [], tasks: [] };
-    this.processedIds.add(providerMessageId);
 
     const contact = this.contacts.get(contactId);
     if (!contact) throw new Error(`Unknown contact ${contactId}`);
+
+    this.processedIds.add(providerMessageId);
 
     const conv = this._getConversation(conversationId, contactId);
     conv.serviceWindowExpiresAt = new Date(new Date(receivedAt).getTime() + 24 * 60 * 60 * 1000).toISOString();

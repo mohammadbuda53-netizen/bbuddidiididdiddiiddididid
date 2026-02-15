@@ -41,6 +41,19 @@ class AppTests(unittest.TestCase):
         sent = self.app.run_scheduler(base + timedelta(days=2))
         self.assertEqual([], sent)
 
+    def test_manual_message_blocked_when_consent_revoked(self) -> None:
+        base = datetime(2026, 1, 1, 10, 0, 0)
+        self.app.receive_inbound("m1", "c1", "u1", "ok", base)
+        self.app.revoke_consent("u1")
+        with self.assertRaisesRegex(ValueError, "consent_revoked"):
+            self.app.send_manual_message(
+                conversation_id="c1",
+                contact_id="u1",
+                content="Hallo",
+                message_type="session_text",
+                now=base + timedelta(hours=1),
+            )
+
 
 if __name__ == "__main__":
     unittest.main()
