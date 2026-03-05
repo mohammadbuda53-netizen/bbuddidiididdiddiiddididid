@@ -1,0 +1,20 @@
+{
+  "name": "handwerker-app",
+  "version": "1.0.0",
+  "description": "Handwerker Projektverwaltung – Zeiterfassung, Lagerverwaltung & mehr",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "seed": "node db/seed.js",
+    "test": "node --test tests/api.test.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.6.2",
+    "cors": "^2.8.6",
+    "express": "^5.2.1"
+  }
+}
