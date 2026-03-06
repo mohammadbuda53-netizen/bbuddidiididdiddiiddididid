@@ -1,7 +1,9 @@
 const http = require('http');
 const { BotService } = require('./src/bot');
+const { HandwerkerService } = require('./src/handwerker');
 
 const bot = new BotService();
+const handwerker = new HandwerkerService();
 const port = Number(process.env.PORT || 3000);
 
 function sendJson(res, status, payload) {
@@ -27,8 +29,16 @@ function readJson(req) {
   });
 }
 
+function parseUrl(req) {
+  const url = new URL(req.url, `http://${req.headers.host}`);
+  const parts = url.pathname.split('/').filter(Boolean);
+  return { url, parts };
+}
+
 const server = http.createServer(async (req, res) => {
   try {
+    const { url, parts } = parseUrl(req);
+
     if (req.method === 'GET' && req.url === '/health') {
       return sendJson(res, 200, { ok: true });
     }
@@ -60,6 +70,66 @@ const server = http.createServer(async (req, res) => {
     if (req.method === 'POST' && req.url === '/scheduler/run') {
       const sent = bot.runScheduler(new Date());
       return sendJson(res, 200, { sent });
+    }
+
+    if (req.method === 'POST' && req.url === '/handwerker/projects') {
+      const body = await readJson(req);
+      const project = handwerker.createProject(body);
+      return sendJson(res, 201, { project });
+    }
+
+    if (req.method === 'GET' && req.url === '/handwerker/projects') {
+      return sendJson(res, 200, { projects: handwerker.listProjects() });
+    }
+
+    if (req.method === 'GET' && parts[0] === 'handwerker' && parts[1] === 'projects' && parts[2]) {
+      const projectId = parts[2];
+      if (parts.length === 3) {
+        return sendJson(res, 200, { project: handwerker.getProject(projectId) });
+      }
+      if (parts[3] === 'summary') {
+        return sendJson(res, 200, { summary: handwerker.projectSummary(projectId) });
+      }
+      if (parts[3] === 'activity') {
+        return sendJson(res, 200, { activity: handwerker.projectActivity(projectId) });
+      }
+      sendJson(res, 404, { error: 'Not found' });
+      return;
+    }
+
+    if (req.method === 'POST' && parts[0] === 'handwerker' && parts[1] === 'projects' && parts[2]) {
+      const projectId = parts[2];
+      const body = await readJson(req);
+      if (parts[3] === 'time-entries') {
+        const entry = handwerker.addTimeEntry({ projectId, ...body });
+        return sendJson(res, 201, { entry });
+      }
+      if (parts[3] === 'notes') {
+        const note = handwerker.addProjectNote({ projectId, ...body });
+        return sendJson(res, 201, { note });
+      }
+      if (parts[3] === 'archive') {
+        const project = handwerker.archiveProject(projectId);
+        return sendJson(res, 200, { project });
+      }
+      sendJson(res, 404, { error: 'Not found' });
+      return;
+    }
+
+    if (req.method === 'POST' && req.url === '/handwerker/warehouse/items') {
+      const body = await readJson(req);
+      const item = handwerker.createWarehouseItem(body);
+      return sendJson(res, 201, { item });
+    }
+
+    if (req.method === 'GET' && req.url === '/handwerker/warehouse/items') {
+      return sendJson(res, 200, { items: handwerker.listWarehouseItems() });
+    }
+
+    if (req.method === 'POST' && req.url === '/handwerker/warehouse/allocate') {
+      const body = await readJson(req);
+      const allocation = handwerker.allocateInventory(body);
+      return sendJson(res, 201, { allocation });
     }
 
     sendJson(res, 404, { error: 'Not found' });
