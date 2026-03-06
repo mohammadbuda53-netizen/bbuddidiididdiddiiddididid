@@ -1,14 +1,21 @@
 {
-  "name": "bbuddidiididdiddiiddididid",
+  "name": "handwerker-pro",
   "version": "1.0.0",
-  "description": "WhatsApp bot MVP server",
+  "description": "HandwerkerPro - Zeiterfassung & Lagerverwaltung",
   "main": "index.js",
   "type": "commonjs",
   "scripts": {
     "start": "node index.js",
-    "test": "node --test"
+    "test": "node --test",
+    "dev:server": "node server/index.js",
+    "dev:app": "cd app && npm start",
+    "build:app": "cd app && npm run build"
   },
   "engines": {
     "node": ">=18"
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.2.1"
   }
 }
